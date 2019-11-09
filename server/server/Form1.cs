@@ -37,7 +37,9 @@ namespace server
             {
                 IPEndPoint endPoint = new IPEndPoint(IPAddress.Any, serverPort);
                 serverSocket.Bind(endPoint);
-                serverSocket.Listen(3);
+                
+                // lenght of all the valid users -> cant be more than that
+                serverSocket.Listen(300);
 
                 listening = true;
                 button_listen.Enabled = false;
@@ -75,7 +77,7 @@ namespace server
                     {
                         // Valid name
                         clientSockets.Add(newClient);
-                        logs.AppendText("A client is connected.\n");
+                        logs.AppendText("Client : " + incomingName + " is connected. \n");
                         Thread receiveThread = new Thread(Receive);
                         receiveThread.Start();
                         string wakeClient = "confirmed";
@@ -121,7 +123,37 @@ namespace server
 
                     string incomingMessage = Encoding.Default.GetString(buffer);
                     incomingMessage = incomingMessage.Substring(0, incomingMessage.IndexOf("\0"));
-                    logs.AppendText("Client: " + incomingMessage + "\n");
+                    
+                    // thisClient will be removed from the list to not get the own message
+                    clientSockets.Remove(thisClient);
+                    if (clientSockets.Count() > 0)
+                    {
+                        // clientsockets can be changed to the list of online clients 
+                        foreach (Socket client in (clientSockets))
+                        {
+                            try
+                            {
+                                logs.AppendText("This message is broadcasted" + incomingMessage + "\n");
+                                client.Send(buffer);
+                            }
+                            catch
+                            {
+                                logs.AppendText("There is a problem! Check the connection...\n");
+                                terminating = true;
+                                textBox_message.Enabled = false;
+                                button_send.Enabled = false;
+                                textBox_port.Enabled = true;
+                                button_listen.Enabled = true;
+                                serverSocket.Close();
+                            }
+
+                        }
+
+                    }
+                    else
+                        logs.AppendText("Message could not be broadcasted only one client connected");
+                    // socket will be added again to not miss the further messages 
+                    clientSockets.Add(thisClient);
                 }
                 catch
                 {
@@ -149,6 +181,7 @@ namespace server
             if(message != "" && message.Length <= 64)
             {
                 Byte[] buffer = Encoding.Default.GetBytes(message);
+                
                 foreach (Socket client in clientSockets)
                 {
                     try
