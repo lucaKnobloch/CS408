@@ -94,7 +94,7 @@ namespace client
                     string incomingMessage = Encoding.Default.GetString(buffer);
                     incomingMessage = incomingMessage.Substring(0, incomingMessage.IndexOf("\0"));
 
-                    logs.AppendText("Server: " + incomingMessage + "\n");
+                    logs.AppendText(incomingMessage + "\n");
                 }
                 catch
                 {
@@ -126,9 +126,11 @@ namespace client
 
             if(message != "" && message.Length <= 64)
             {
+                message = nameBox.Text + ": " + message;
                 Byte[] buffer = new Byte[64];
                 buffer = Encoding.Default.GetBytes(message);
                 clientSocket.Send(buffer);
+                logs.AppendText(message + "\n");
             }
 
         }

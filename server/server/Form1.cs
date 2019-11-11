@@ -136,7 +136,7 @@ namespace server
 
                     string incomingMessage = Encoding.Default.GetString(buffer);
                     incomingMessage = incomingMessage.Substring(0, incomingMessage.IndexOf("\0"));
-                    
+
                     // thisClient will be removed from the list to not get the own message
                     clientSockets.Remove(thisClient);
                     if (clientSockets.Count() > 0)
@@ -146,7 +146,7 @@ namespace server
                         {
                             try
                             {
-                                logs.AppendText("This message is broadcasted" + incomingMessage + "\n");
+                                logs.AppendText("This message is broadcasted: " + incomingMessage + "\n");
                                 client.Send(buffer);
                             }
                             catch
