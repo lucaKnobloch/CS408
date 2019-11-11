@@ -57,7 +57,8 @@ namespace server
                 logs.AppendText("Please check port number \n");
             }
         }
- List<string> Onlines;
+
+ List<string> Onlines = new List<string>();
         private void Accept()
         {
             while(listening)
@@ -72,7 +73,7 @@ namespace server
                     string incomingName = Encoding.Default.GetString(nameBuffer);
                     incomingName = incomingName.Substring(0, incomingName.IndexOf("\0"));
                     
-                    string[] lines = System.IO.File.ReadAllLines(@".\server\users_db.txt");
+                    string[] lines = System.IO.File.ReadAllLines(@"user_db.txt");
                        
 
                     // Name is checked here
@@ -82,8 +83,9 @@ namespace server
                         string wakeClient = "denied";
                         Byte[] buffer = Encoding.Default.GetBytes(wakeClient);
                         newClient.Send(buffer);
-                        newClient.Close();
+                        newClient.Shutdown(SocketShutdown.Both);
                         logs.AppendText("A client tried to connect with invalid name.\n");
+                        newClient.Close();
 
                     }
                     else
@@ -104,8 +106,9 @@ namespace server
 
                     }
                 }
-                catch
+                catch (Exception e)
                 {
+                    logs.AppendText(e.ToString());
                     if (terminating)
                     {
                         listening = false;

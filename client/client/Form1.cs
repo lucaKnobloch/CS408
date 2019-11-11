@@ -56,7 +56,7 @@ namespace client
                             // Invalid name
                             logs.AppendText("Invalid Name\n");
                         }
-                        else
+                        else if (confirmName == "confirmed")
                         {
                             // Valid name
                             button_connect.Enabled = false;
