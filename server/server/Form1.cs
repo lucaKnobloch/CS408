@@ -57,7 +57,7 @@ namespace server
                 logs.AppendText("Please check port number \n");
             }
         }
-
+ List<string> Onlines;
         private void Accept()
         {
             while(listening)
@@ -71,27 +71,37 @@ namespace server
                     newClient.Receive(nameBuffer);
                     string incomingName = Encoding.Default.GetString(nameBuffer);
                     incomingName = incomingName.Substring(0, incomingName.IndexOf("\0"));
+                    
+                    string[] lines = System.IO.File.ReadAllLines(@".\server\users_db.txt");
+                       
 
                     // Name is checked here
-                    if(incomingName == "xyz")
+                    if(!lines.Contains(incomingName) || Onlines.Contains(incomingName))
+                    {
+                        // Invalid name
+                        string wakeClient = "denied";
+                        Byte[] buffer = Encoding.Default.GetBytes(wakeClient);
+                        newClient.Send(buffer);
+                        newClient.Close();
+                        logs.AppendText("A client tried to connect with invalid name.\n");
+
+                    }
+                    else
                     {
                         // Valid name
                         clientSockets.Add(newClient);
                         logs.AppendText("Client : " + incomingName + " is connected. \n");
                         Thread receiveThread = new Thread(Receive);
                         receiveThread.Start();
+
+                        // sends message 
                         string wakeClient = "confirmed";
                         Byte[] buffer = Encoding.Default.GetBytes(wakeClient);
                         newClient.Send(buffer);
-                    }
-                    else
-                    {
-                        // Invalid name
-                        string wakeClient = "denied";
-                        Byte[] buffer = Encoding.Default.GetBytes(wakeClient);
-                        newClient.Send(buffer); 
-                        newClient.Close();
-                        logs.AppendText("A client tried to connect with invalid name.\n");
+
+                        // adds name 
+                        Onlines.Add(incomingName);
+
                     }
                 }
                 catch

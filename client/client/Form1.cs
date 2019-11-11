@@ -43,8 +43,8 @@ namespace client
                         Byte[] buffer = new Byte[64];
                         buffer = Encoding.Default.GetBytes(name);
                         clientSocket.Send(buffer);
-                        // Client waits here to recieve confirmation
 
+                        // Client waits here to recieve confirmation
                         Byte[] confirmBuffer = new Byte[64];
                         clientSocket.Receive(confirmBuffer);
                         string confirmName = Encoding.Default.GetString(confirmBuffer);
