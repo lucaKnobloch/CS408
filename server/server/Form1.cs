@@ -137,7 +137,11 @@ namespace server
                     string incomingMessage = Encoding.Default.GetString(buffer);
                     incomingMessage = incomingMessage.Substring(0, incomingMessage.IndexOf("\0"));
 
+                    // find name of thisClient user
+                    int index = clientSockets.FindIndex(socket => socket == thisClient);
+                    string thisName = Onlines[index];
                     // thisClient will be removed from the list to not get the own message
+                    Onlines.Remove(thisName);
                     clientSockets.Remove(thisClient);
                     if (clientSockets.Count() > 0)
                     {
@@ -167,6 +171,7 @@ namespace server
                         logs.AppendText("Message could not be broadcasted only one client connected");
                     // socket will be added again to not miss the further messages 
                     clientSockets.Add(thisClient);
+                    Onlines.Add(thisName);
                 }
                 catch
                 {
@@ -174,6 +179,7 @@ namespace server
                     {
                         logs.AppendText("A client has disconnected\n");
                     }
+                    Onlines.RemoveAt(clientSockets.FindIndex(socket => socket == thisClient));
                     thisClient.Close();
                     clientSockets.Remove(thisClient);
                     connected = false;
