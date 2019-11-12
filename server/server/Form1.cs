@@ -106,9 +106,8 @@ namespace server
 
                     }
                 }
-                catch (Exception e)
+                catch 
                 {
-                    logs.AppendText(e.ToString());
                     if (terminating)
                     {
                         listening = false;

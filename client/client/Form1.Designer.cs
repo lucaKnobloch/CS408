@@ -39,6 +39,7 @@
             this.button_send = new System.Windows.Forms.Button();
             this.nameBox = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
+            this.disconnectButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // label1
@@ -64,7 +65,7 @@
             // textBox_ip
             // 
             this.textBox_ip.Location = new System.Drawing.Point(89, 62);
-            this.textBox_ip.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.textBox_ip.Margin = new System.Windows.Forms.Padding(2);
             this.textBox_ip.Name = "textBox_ip";
             this.textBox_ip.Size = new System.Drawing.Size(116, 22);
             this.textBox_ip.TabIndex = 2;
@@ -72,17 +73,17 @@
             // textBox_port
             // 
             this.textBox_port.Location = new System.Drawing.Point(89, 97);
-            this.textBox_port.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.textBox_port.Margin = new System.Windows.Forms.Padding(2);
             this.textBox_port.Name = "textBox_port";
             this.textBox_port.Size = new System.Drawing.Size(116, 22);
             this.textBox_port.TabIndex = 3;
             // 
             // button_connect
             // 
-            this.button_connect.Location = new System.Drawing.Point(89, 188);
-            this.button_connect.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.button_connect.Location = new System.Drawing.Point(89, 172);
+            this.button_connect.Margin = new System.Windows.Forms.Padding(2);
             this.button_connect.Name = "button_connect";
-            this.button_connect.Size = new System.Drawing.Size(93, 28);
+            this.button_connect.Size = new System.Drawing.Size(116, 28);
             this.button_connect.TabIndex = 4;
             this.button_connect.Text = "connect";
             this.button_connect.UseVisualStyleBackColor = true;
@@ -91,7 +92,7 @@
             // logs
             // 
             this.logs.Location = new System.Drawing.Point(325, 64);
-            this.logs.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.logs.Margin = new System.Windows.Forms.Padding(2);
             this.logs.Name = "logs";
             this.logs.Size = new System.Drawing.Size(255, 320);
             this.logs.TabIndex = 5;
@@ -101,7 +102,7 @@
             // 
             this.textBox_message.Enabled = false;
             this.textBox_message.Location = new System.Drawing.Point(89, 338);
-            this.textBox_message.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.textBox_message.Margin = new System.Windows.Forms.Padding(2);
             this.textBox_message.Name = "textBox_message";
             this.textBox_message.Size = new System.Drawing.Size(129, 22);
             this.textBox_message.TabIndex = 6;
@@ -120,7 +121,7 @@
             // 
             this.button_send.Enabled = false;
             this.button_send.Location = new System.Drawing.Point(221, 332);
-            this.button_send.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.button_send.Margin = new System.Windows.Forms.Padding(2);
             this.button_send.Name = "button_send";
             this.button_send.Size = new System.Drawing.Size(87, 32);
             this.button_send.TabIndex = 8;
@@ -130,7 +131,7 @@
             // 
             // nameBox
             // 
-            this.nameBox.Location = new System.Drawing.Point(89, 134);
+            this.nameBox.Location = new System.Drawing.Point(89, 132);
             this.nameBox.Margin = new System.Windows.Forms.Padding(2);
             this.nameBox.Name = "nameBox";
             this.nameBox.Size = new System.Drawing.Size(116, 22);
@@ -140,19 +141,31 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(47, 137);
+            this.label4.Location = new System.Drawing.Point(40, 135);
             this.label4.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(45, 17);
+            this.label4.Size = new System.Drawing.Size(49, 17);
             this.label4.TabIndex = 1;
-            this.label4.Text = "Name";
+            this.label4.Text = "Name:";
             this.label4.Click += new System.EventHandler(this.label4_Click);
+            // 
+            // disconnectButton
+            // 
+            this.disconnectButton.Enabled = false;
+            this.disconnectButton.Location = new System.Drawing.Point(406, 401);
+            this.disconnectButton.Name = "disconnectButton";
+            this.disconnectButton.Size = new System.Drawing.Size(173, 28);
+            this.disconnectButton.TabIndex = 10;
+            this.disconnectButton.Text = "Disconnect";
+            this.disconnectButton.UseVisualStyleBackColor = true;
+            this.disconnectButton.Click += new System.EventHandler(this.disconnectButton_Click);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(600, 441);
+            this.Controls.Add(this.disconnectButton);
             this.Controls.Add(this.nameBox);
             this.Controls.Add(this.button_send);
             this.Controls.Add(this.label3);
@@ -164,7 +177,7 @@
             this.Controls.Add(this.label4);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
-            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "Form1";
             this.Text = "Form1";
             this.ResumeLayout(false);
@@ -185,6 +198,7 @@
         private System.Windows.Forms.Button button_send;
         private System.Windows.Forms.TextBox nameBox;
         private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Button disconnectButton;
     }
 }
 

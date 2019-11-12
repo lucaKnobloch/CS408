@@ -62,6 +62,7 @@ namespace client
                             button_connect.Enabled = false;
                             textBox_message.Enabled = true;
                             button_send.Enabled = true;
+                            disconnectButton.Enabled = true;
                             connected = true;
                             logs.AppendText("Connected to the server!\n");
                             Thread receiveThread = new Thread(Receive);
@@ -104,6 +105,7 @@ namespace client
                         button_connect.Enabled = true;
                         textBox_message.Enabled = false;
                         button_send.Enabled = false;
+                        disconnectButton.Enabled = false;
                     }
 
                     clientSocket.Close();
@@ -143,6 +145,17 @@ namespace client
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
 
+        }
+
+        private void disconnectButton_Click(object sender, EventArgs e)
+        {
+            logs.AppendText("Disconnected from server\n");
+            button_connect.Enabled = true;
+            textBox_message.Enabled = false;
+            button_send.Enabled = false;
+            disconnectButton.Enabled = false;
+            clientSocket.Close();
+            connected = false;
         }
     }
 }
