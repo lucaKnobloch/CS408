@@ -52,3 +52,12 @@ C:\Users\LucaKnobloch\Desktop\lucaknobloch_Knobloch_Luca_Step2\client\client\obj
 C:\Users\LucaKnobloch\Desktop\lucaknobloch_Knobloch_Luca_Step2\client\client\obj\Debug\client.Form1.resources
 C:\Users\LucaKnobloch\Desktop\lucaknobloch_Knobloch_Luca_Step2\client\client\obj\Debug\client.Properties.Resources.resources
 C:\Users\LucaKnobloch\Desktop\lucaknobloch_Knobloch_Luca_Step2\client\client\obj\Debug\client.csproj.GenerateResource.Cache
+C:\Users\Oden\Desktop\CS408-master\client\client\bin\Debug\client.exe.config
+C:\Users\Oden\Desktop\CS408-master\client\client\bin\Debug\client.exe
+C:\Users\Oden\Desktop\CS408-master\client\client\bin\Debug\client.pdb
+C:\Users\Oden\Desktop\CS408-master\client\client\obj\Debug\client.csprojAssemblyReference.cache
+C:\Users\Oden\Desktop\CS408-master\client\client\obj\Debug\client.Form1.resources
+C:\Users\Oden\Desktop\CS408-master\client\client\obj\Debug\client.Properties.Resources.resources
+C:\Users\Oden\Desktop\CS408-master\client\client\obj\Debug\client.csproj.GenerateResource.cache
+C:\Users\Oden\Desktop\CS408-master\client\client\obj\Debug\client.exe
+C:\Users\Oden\Desktop\CS408-master\client\client\obj\Debug\client.pdb

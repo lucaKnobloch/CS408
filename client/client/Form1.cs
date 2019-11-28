@@ -15,7 +15,7 @@ namespace client
     public partial class Form1 : Form
     {
         Semaphore requestConfirm = new Semaphore(0, 1);
-        bool friendRequestValid;
+        bool friendRequestValid = false;
         bool terminating = false;
         bool connected = false;
         Socket clientSocket;
@@ -211,6 +211,7 @@ namespace client
 
         private void add_button_Click(object sender, EventArgs e)
         {
+           
             string friendRequest;
             // TODO: Replace xyz with identifier for friend request
             if (friend_box.Text == "" || friend_box.Text.Length > 64)
@@ -219,7 +220,7 @@ namespace client
             }
             else
             {
-                friendRequest = "xyz" + nameBox.Text + "+" + friend_box.Text;
+                friendRequest = "sentrequestby(" + nameBox.Text + ")" + friend_box.Text;
                 Byte[] buffer = new Byte[64];
                 buffer = Encoding.Default.GetBytes(friendRequest);
                 clientSocket.Send(buffer);
@@ -236,7 +237,7 @@ namespace client
             }
         }
 
-        private void button2_Click(object sender, EventArgs e)
+        private void button2_Click(object sender, EventArgs e)//STEP 3 ? -Ozgur
         {
             string friendRemove;
             // TODO: Replace xyz with identifier for friend remove
@@ -292,7 +293,7 @@ namespace client
                 Byte[] buffer = new Byte[64];
                 buffer = Encoding.Default.GetBytes(friendRequest);
                 clientSocket.Send(buffer);
-                logs.AppendText(friend_box.Text + " removed from friends friends requests" + ".\n");
+                logs.AppendText(friend_box.Text + " removed from friends requests" + ".\n");
             }
         }
 

@@ -168,7 +168,7 @@
             this.requestBox.ItemHeight = 16;
             this.requestBox.Location = new System.Drawing.Point(470, 61);
             this.requestBox.Name = "requestBox";
-            this.requestBox.Size = new System.Drawing.Size(280, 340);
+            this.requestBox.Size = new System.Drawing.Size(280, 324);
             this.requestBox.TabIndex = 11;
             // 
             // form1BindingSource
