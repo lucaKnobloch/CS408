@@ -14,7 +14,8 @@ namespace client
 {
     public partial class Form1 : Form
     {
-
+        Semaphore requestConfirm = new Semaphore(0,1);
+        bool friendRequestValid;
         bool terminating = false;
         bool connected = false;
         Socket clientSocket;
@@ -91,11 +92,29 @@ namespace client
                 {
                     Byte[] buffer = new Byte[64];
                     clientSocket.Receive(buffer);
-
                     string incomingMessage = Encoding.Default.GetString(buffer);
                     incomingMessage = incomingMessage.Substring(0, incomingMessage.IndexOf("\0"));
-
-                    logs.AppendText(incomingMessage + "\n");
+                    // TODO: Replace if condition with a check for identifier for incoming friend request.
+                    if(incomingMessage.StartsWith("xyz"))
+                    {
+                        // TODO: Replace xyz with identifier for incoming friend request
+                        incomingMessage = incomingMessage.Replace("xyz","");
+                        requestBox.BeginUpdate();
+                        requestBox.Items.Add(incomingMessage);
+                    }
+                    // TODO: Replace xxyz with identifier for confirming/denying valid friend request
+                    else if(incomingMessage.StartsWith("xxyz"))
+                    {
+                        incomingMessage = incomingMessage.Replace("xxyz","");
+                        friendRequestValid = false;
+                        if (incomingMessage == "valid")
+                            friendRequestValid = true;
+                        requestConfirm.Release(1);
+                    }
+                    else
+                    {
+                        logs.AppendText(incomingMessage + "\n");
+                    }
                 }
                 catch
                 {
@@ -156,6 +175,103 @@ namespace client
             disconnectButton.Enabled = false;
             clientSocket.Close();
             connected = false;
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void add_button_Click(object sender, EventArgs e)
+        {
+            string friendRequest;
+            // TODO: Replace xyz with identifier for friend request
+            if(friend_box.Text == "" || friend_box.Text.Length > 64)
+            {
+                logs.AppendText("Invalid friend name");
+            }
+            else
+            {
+                friendRequest = "xyz" + nameBox.Text + "+" + friend_box.Text;
+                Byte[] buffer = new Byte[64];
+                buffer = Encoding.Default.GetBytes(friendRequest);
+                clientSocket.Send(buffer);
+                requestConfirm.WaitOne();
+                if(friendRequestValid)
+                {
+                    logs.AppendText("Friend invite sent to " + friend_box.Text + ".\n");
+                }
+                else
+                {
+                    logs.AppendText("Invalid friend name");
+                }
+
+            }
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            string friendRemove;
+            // TODO: Replace xyz with identifier for friend remove
+            if (friend_box.Text == "" || friend_box.Text.Length > 64)
+            {
+                logs.AppendText("Invalid friend name");
+            }
+            else
+            {
+                friendRemove = "xyz" + nameBox.Text + "+" + friend_box.Text;
+                Byte[] buffer = new Byte[64];
+                buffer = Encoding.Default.GetBytes(friendRemove);
+                clientSocket.Send(buffer);
+                requestConfirm.WaitOne();
+                if (friendRequestValid)
+                {
+                    logs.AppendText(friend_box.Text + " removed from friends list" + ".\n");
+                }
+                else
+                {
+                    logs.AppendText("Invalid friend name");
+                }
+            }
+        }
+
+        private void acceptButton_Click(object sender, EventArgs e)
+        {
+            if(requestBox.SelectedItem.ToString() == "")
+            {
+                logs.AppendText("No friend request selected.");
+            }
+            else
+            {
+                // TODO: Replace xyz with identifier for accepting friends request
+                string friendRequest = "xyz" + nameBox.Text + requestBox.SelectedItem.ToString();
+                Byte[] buffer = new Byte[64];
+                buffer = Encoding.Default.GetBytes(friendRequest);
+                clientSocket.Send(buffer);
+                logs.AppendText(friend_box.Text + " added to friends list" + ".\n");
+            }
+        }
+
+        private void rejectButton_Click(object sender, EventArgs e)
+        {
+            if (requestBox.SelectedItem.ToString() == "")
+            {
+                logs.AppendText("No friend request selected.");
+            }
+            else
+            {
+                // TODO: Replace xyz with identifier for rejecting friends request
+                string friendRequest = "xyz" + nameBox.Text + requestBox.SelectedItem.ToString();
+                Byte[] buffer = new Byte[64];
+                buffer = Encoding.Default.GetBytes(friendRequest);
+                clientSocket.Send(buffer);
+                logs.AppendText(friend_box.Text + " removed from friends friends requests" + ".\n");
+            }
+        }
+
+        private void requestFriendList_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }
