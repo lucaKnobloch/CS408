@@ -168,6 +168,7 @@ namespace server
                     }
                     else
                         logs.AppendText("Message could not be broadcasted only one client connected");
+                    
                     // socket will be added again to not miss the further messages 
                     clientSockets.Add(thisClient);
                     Onlines.Add(thisName);
@@ -176,7 +177,7 @@ namespace server
                 {
                     if(!terminating)
                     {
-                        logs.AppendText("A client has disconnected\n");
+                        logs.AppendText("Client has disconnected\n");
                     }
                     Onlines.RemoveAt(clientSockets.FindIndex(socket => socket == thisClient));
                     thisClient.Close();
@@ -196,8 +197,9 @@ namespace server
         private void button_send_Click(object sender, EventArgs e)
         {
             string message = textBox_message.Text;
-            if(message != "" && message.Length <= 64)
+            if(message != "" )
             {
+                if ( message.Length <= 64) { 
                 Byte[] buffer = Encoding.Default.GetBytes(message);
                 
                 foreach (Socket client in clientSockets)
@@ -218,6 +220,15 @@ namespace server
                     }
 
                 }
+                }
+                else
+                {
+                    logs.AppendText("The message is too long!\n");
+                }
+            }
+            else
+            {
+                logs.AppendText("Add a message to sent\n ");
             }
         }
     }

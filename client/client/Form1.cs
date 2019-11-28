@@ -14,7 +14,7 @@ namespace client
 {
     public partial class Form1 : Form
     {
-        Semaphore requestConfirm = new Semaphore(0,1);
+        Semaphore requestConfirm = new Semaphore(0, 1);
         bool friendRequestValid;
         bool terminating = false;
         bool connected = false;
@@ -33,42 +33,55 @@ namespace client
             string IP = textBox_ip.Text;
             string name = nameBox.Text;
             int portNum;
-            if(Int32.TryParse(textBox_port.Text, out portNum))
+            if (Int32.TryParse(textBox_port.Text, out portNum))
             {
                 try
                 {
-                    clientSocket.Connect(IP, portNum);
-                    if (name != "" && name.Length <= 64)
+
+                    if (IP != "")
                     {
-                        // Send name
-                        Byte[] buffer = new Byte[64];
-                        buffer = Encoding.Default.GetBytes(name);
-                        clientSocket.Send(buffer);
-
-                        // Client waits here to recieve confirmation
-                        Byte[] confirmBuffer = new Byte[64];
-                        clientSocket.Receive(confirmBuffer);
-                        string confirmName = Encoding.Default.GetString(confirmBuffer);
-                        confirmName = confirmName.Substring(0, confirmName.IndexOf("\0"));
-
-                        // Name confirmation is checked here
-                        if( confirmName == "denied")
+                        if (name != "" && name.Length <= 64)
                         {
-                            // Invalid name
-                            logs.AppendText("Invalid Name\n");
+                            clientSocket.Connect(IP, portNum);
+                            terminating = false;
+                            // Send name
+                            Byte[] buffer = new Byte[64];
+                            buffer = Encoding.Default.GetBytes(name);
+                            clientSocket.Send(buffer);
+
+                            // Client waits here to recieve confirmation
+                            Byte[] confirmBuffer = new Byte[64];
+                            clientSocket.Receive(confirmBuffer);
+                            string confirmName = Encoding.Default.GetString(confirmBuffer);
+                            confirmName = confirmName.Substring(0, confirmName.IndexOf("\0"));
+
+                            // Name confirmation is checked here
+                            if (confirmName == "denied")
+                            {
+                                // Invalid name
+                                logs.AppendText("Invalid Name\n");
+                            }
+                            else if (confirmName == "confirmed")
+                            {
+                                // Valid name
+                                button_connect.Enabled = false;
+                                textBox_message.Enabled = true;
+                                button_send.Enabled = true;
+                                disconnectButton.Enabled = true;
+                                connected = true;
+                                logs.AppendText("Connected to the server!\n");
+                                Thread receiveThread = new Thread(Receive);
+                                receiveThread.Start();
+                            }
                         }
-                        else if (confirmName == "confirmed")
+                        else
                         {
-                            // Valid name
-                            button_connect.Enabled = false;
-                            textBox_message.Enabled = true;
-                            button_send.Enabled = true;
-                            disconnectButton.Enabled = true;
-                            connected = true;
-                            logs.AppendText("Connected to the server!\n");
-                            Thread receiveThread = new Thread(Receive);
-                            receiveThread.Start();
+                            logs.AppendText("Add your name!\n");
                         }
+                    }
+                    else
+                    {
+                        logs.AppendText("Add a IP address\n");
                     }
 
                 }
@@ -86,7 +99,7 @@ namespace client
 
         private void Receive()
         {
-            while(connected)
+            while (connected)
             {
                 try
                 {
@@ -95,17 +108,17 @@ namespace client
                     string incomingMessage = Encoding.Default.GetString(buffer);
                     incomingMessage = incomingMessage.Substring(0, incomingMessage.IndexOf("\0"));
                     // TODO: Replace if condition with a check for identifier for incoming friend request.
-                    if(incomingMessage.StartsWith("xyz"))
+                    if (incomingMessage.StartsWith("xyz"))
                     {
                         // TODO: Replace xyz with identifier for incoming friend request
-                        incomingMessage = incomingMessage.Replace("xyz","");
+                        incomingMessage = incomingMessage.Replace("xyz", "");
                         requestBox.BeginUpdate();
                         requestBox.Items.Add(incomingMessage);
                     }
                     // TODO: Replace xxyz with identifier for confirming/denying valid friend request
-                    else if(incomingMessage.StartsWith("xxyz"))
+                    else if (incomingMessage.StartsWith("xxyz"))
                     {
-                        incomingMessage = incomingMessage.Replace("xxyz","");
+                        incomingMessage = incomingMessage.Replace("xxyz", "");
                         friendRequestValid = false;
                         if (incomingMessage == "valid")
                             friendRequestValid = true;
@@ -145,13 +158,26 @@ namespace client
         {
             string message = textBox_message.Text;
 
-            if(message != "" && message.Length <= 64)
+            if (message != "")
             {
-                message = nameBox.Text + ": " + message;
-                Byte[] buffer = new Byte[64];
-                buffer = Encoding.Default.GetBytes(message);
-                clientSocket.Send(buffer);
-                logs.AppendText(message + "\n");
+                if (message.Length <= 64)
+                {
+                    message = nameBox.Text + ": " + message;
+                    Byte[] buffer = new Byte[64];
+                    buffer = Encoding.Default.GetBytes(message);
+                    clientSocket.Send(buffer);
+                    logs.AppendText(message + "\n");
+                }
+                else
+                {
+                    logs.AppendText("The message is too long!" + "\n");
+                }
+
+            }
+
+            else
+            {
+                logs.AppendText("Add a message to sent" + "\n");
             }
 
         }
@@ -175,6 +201,7 @@ namespace client
             disconnectButton.Enabled = false;
             clientSocket.Close();
             connected = false;
+            terminating = true;
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -186,7 +213,7 @@ namespace client
         {
             string friendRequest;
             // TODO: Replace xyz with identifier for friend request
-            if(friend_box.Text == "" || friend_box.Text.Length > 64)
+            if (friend_box.Text == "" || friend_box.Text.Length > 64)
             {
                 logs.AppendText("Invalid friend name");
             }
@@ -197,7 +224,7 @@ namespace client
                 buffer = Encoding.Default.GetBytes(friendRequest);
                 clientSocket.Send(buffer);
                 requestConfirm.WaitOne();
-                if(friendRequestValid)
+                if (friendRequestValid)
                 {
                     logs.AppendText("Friend invite sent to " + friend_box.Text + ".\n");
                 }
@@ -237,7 +264,7 @@ namespace client
 
         private void acceptButton_Click(object sender, EventArgs e)
         {
-            if(requestBox.SelectedItem.ToString() == "")
+            if (requestBox.SelectedItem.ToString() == "")
             {
                 logs.AppendText("No friend request selected.");
             }
