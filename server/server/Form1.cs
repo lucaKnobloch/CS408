@@ -27,7 +27,7 @@ namespace server
         bool terminating = false;
         bool listening = false;
 
-        List<Request> pending;
+        List<Request> pending = new List<Request>();
 
         public Form1()
         {
