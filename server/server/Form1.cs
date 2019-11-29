@@ -167,6 +167,10 @@ namespace server
 
                     if (lines.Contains(to))
                     {
+                        string message = "/valid/";
+                        buffer = Encoding.Default.GetBytes(message);
+                        thisClient.Send(buffer);
+
                         if (!Onlines.Contains(to))
                             pending.Add(new Request { From = from, To = to });
                         else

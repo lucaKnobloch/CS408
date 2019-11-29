@@ -116,9 +116,9 @@ namespace client
                         requestBox.Items.Add(incomingMessage);
                     }
                     // TODO: Replace xxyz with identifier for confirming/denying valid friend request
-                    else if (incomingMessage.StartsWith("xxyz"))
+                    else if (incomingMessage.StartsWith("/"))
                     {
-                        incomingMessage = incomingMessage.Replace("xxyz", "");
+                        incomingMessage = incomingMessage.Replace("/", "");
                         friendRequestValid = false;
                         if (incomingMessage == "valid")
                             friendRequestValid = true;
