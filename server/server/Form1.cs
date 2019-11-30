@@ -229,9 +229,19 @@ namespace server
                             string rejector = incomingMessage.Substring(0, incomingMessage.IndexOf("-"));
                             incomingMessage = incomingMessage.Replace(rejector + "-", "");
                             string rejected = incomingMessage;
-                            string message = rejector + " rejected your friend invite.\n";
-                            buffer = Encoding.Default.GetBytes(message);
-                            clientSockets[Onlines.IndexOf(rejected)].Send(buffer);
+                            if (!friendships[rejected].Contains(rejector) && !friendships[rejector].Contains(rejected))
+                            {
+                                string message = rejector + " rejected your friend invite.\n";
+                                buffer = Encoding.Default.GetBytes(message);
+                                clientSockets[Onlines.IndexOf(rejected)].Send(buffer);
+                            }
+                            else
+                            {
+                                string message = rejected + " is already in friends list.\n";
+                                buffer = Encoding.Default.GetBytes(message);
+                                thisClient.Send(buffer);
+                                logs.AppendText(rejector + " tried to reject " + rejected + "'s already accepted friend request.\n");
+                            }
                         }
                         else if (incomingMessage.StartsWith("Accept"))
                         {
@@ -239,12 +249,22 @@ namespace server
                             string accepter = incomingMessage.Substring(0, incomingMessage.IndexOf("-"));
                             incomingMessage = incomingMessage.Replace(accepter + "-", "");
                             string accepted = incomingMessage;
-                            string message = accepter + " accepted your friend invite.\n";
-                            buffer = Encoding.Default.GetBytes(message);
-                            clientSockets[Onlines.IndexOf(accepted)].Send(buffer);
-                            logs.AppendText(accepter + " accepted " + accepted + "'s friend request.\n");
-                            friendships[accepted].Add(accepter);
-                            friendships[accepter].Add(accepted);
+                            if(!friendships[accepted].Contains(accepter) && !friendships[accepter].Contains(accepted))
+                            {
+                                string message = accepter + " accepted your friend invite.\n";
+                                buffer = Encoding.Default.GetBytes(message);
+                                clientSockets[Onlines.IndexOf(accepted)].Send(buffer);
+                                logs.AppendText(accepter + " accepted " + accepted + "'s friend request.\n");
+                                friendships[accepted].Add(accepter);
+                                friendships[accepter].Add(accepted);
+                            }
+                            else
+                            {
+                                string message = accepted + " is already in friends list.\n";
+                                buffer = Encoding.Default.GetBytes(message);
+                                thisClient.Send(buffer);
+                                logs.AppendText(accepter + " tried to re-accepted " + accepted + "'s friend request.\n");
+                            }
                         }
                     }
                     else if (incomingMessage.StartsWith("flist"))
