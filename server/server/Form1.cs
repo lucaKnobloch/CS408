@@ -113,12 +113,25 @@ namespace server
                         {
                             if (incomingName == req.To )
                             {
-                                //TODO: implement sending request to now online user.
-                                pending.Remove(req);
+                                try
+                                {
+                                    string request = "friendrequestfrom" + req.From;
+                                    buffer = Encoding.Default.GetBytes(request);
+                                    newClient.Send(buffer);
+                                    pending.Remove(req);
+                                }
+                                catch
+                                {
+                                    logs.AppendText("There is a problem! Check the connection...\n");
+                                    terminating = true;
+                                    textBox_message.Enabled = false;
+                                    button_send.Enabled = false;
+                                    textBox_port.Enabled = true;
+                                    button_listen.Enabled = true;
+                                    serverSocket.Close();
+                                }
                             }
                         }
-
-
                     }
                 }
                 catch
@@ -175,7 +188,24 @@ namespace server
                             pending.Add(new Request { From = from, To = to });
                         else
                         {
-                            //TODO: Implement the online part
+                            try
+                            {
+                                string request = "friendrequestfrom" + from;
+                                buffer = Encoding.Default.GetBytes(request);
+                                int index = Onlines.FindIndex(a => a == to);
+                                Socket invitee = clientSockets[index];
+                                invitee.Send(buffer);
+                            }
+                            catch
+                            {
+                                logs.AppendText("There is a problem! Check the connection...\n");
+                                terminating = true;
+                                textBox_message.Enabled = false;
+                                button_send.Enabled = false;
+                                textBox_port.Enabled = true;
+                                button_listen.Enabled = true;
+                                serverSocket.Close();
+                            }
                         }
                     }
                     else
@@ -201,23 +231,10 @@ namespace server
                 }
                 else
                     try
-                    {///////////////////////////////////////////////////////////////////////////////////////
-                     /* 
-                        Byte[] buffer = new Byte[64];
-                        thisClient.Receive(buffer);
-
-                        string incomingMessage = Encoding.Default.GetString(buffer);
-                        incomingMessage = incomingMessage.Substring(0, incomingMessage.IndexOf("\0"));
-                                   THIS PART IS OUT BECAUSE I CARRIED IT UPSIDE-Ozgur
-                    */
-                     /////////////////////////////////////////////////////////////////////////////////
-
+                    {
                         // find name of thisClient user
                         int index = clientSockets.FindIndex(socket => socket == thisClient);
                         string thisName = Onlines[index];
-                        // thisClient will be removed from the list to not get the own message
-                        Onlines.Remove(thisName);
-                        clientSockets.Remove(thisClient);
                         if (clientSockets.Count() > 0)
                         {
                             // clientsockets can be changed to the list of online clients
@@ -225,8 +242,8 @@ namespace server
                             {
                                 try
                                 {
-                                    logs.AppendText("This message is broadcasted: " + incomingMessage + "\n");
-                                    client.Send(buffer);
+                                    if(client != thisClient)
+                                        client.Send(buffer);
                                 }
                                 catch
                                 {
@@ -238,15 +255,12 @@ namespace server
                                     button_listen.Enabled = true;
                                     serverSocket.Close();
                                 }
-
                             }
-
+                            logs.AppendText("This message is broadcasted: " + incomingMessage + "\n");
                         }
                         else
                             logs.AppendText("Message could not be broadcasted only one client connected");
-                        // socket will be added again to not miss the further messages 
-                        clientSockets.Add(thisClient);
-                        Onlines.Add(thisName);
+
                     }
                     catch
                     {
@@ -254,9 +268,12 @@ namespace server
                         {
                             logs.AppendText("A client has disconnected\n");
                         }
-                        Onlines.RemoveAt(clientSockets.FindIndex(socket => socket == thisClient));
-                        thisClient.Close();
+                        int index = clientSockets.FindIndex(socket => socket == thisClient);
+                        string thisName = Onlines[index];
+                        // thisClient will be removed from the list to not get the own message
+                        Onlines.Remove(thisName);
                         clientSockets.Remove(thisClient);
+                        thisClient.Close();
                         connected = false;
                     }
             }

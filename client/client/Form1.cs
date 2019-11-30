@@ -108,12 +108,13 @@ namespace client
                     string incomingMessage = Encoding.Default.GetString(buffer);
                     incomingMessage = incomingMessage.Substring(0, incomingMessage.IndexOf("\0"));
                     // TODO: Replace if condition with a check for identifier for incoming friend request.
-                    if (incomingMessage.StartsWith("xyz"))
+                    if (incomingMessage.StartsWith("friendrequestfrom"))
                     {
                         // TODO: Replace xyz with identifier for incoming friend request
-                        incomingMessage = incomingMessage.Replace("xyz", "");
+                        incomingMessage = incomingMessage.Replace("friendrequestfrom", "");
                         requestBox.BeginUpdate();
                         requestBox.Items.Add(incomingMessage);
+                        requestBox.EndUpdate();
                     }
                     // TODO: Replace xxyz with identifier for confirming/denying valid friend request
                     else if (incomingMessage.StartsWith("/"))
