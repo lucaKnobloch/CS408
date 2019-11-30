@@ -270,8 +270,7 @@ namespace client
             }
             else
             {
-                // TODO: Replace xyz with identifier for accepting friends request
-                string friendRequest = "xyz" + nameBox.Text + requestBox.SelectedItem.ToString();
+                string friendRequest = "freplyAccept" + nameBox.Text + "-" + requestBox.SelectedItem.ToString();
                 Byte[] buffer = new Byte[64];
                 buffer = Encoding.Default.GetBytes(friendRequest);
                 clientSocket.Send(buffer);
@@ -289,18 +288,22 @@ namespace client
             }
             else
             {
-                // TODO: Replace xyz with identifier for rejecting friends request
-                string friendRequest = "xyz" + nameBox.Text + requestBox.SelectedItem.ToString();
+                string friendRequest = "freplyReject" + nameBox.Text + "-" + requestBox.SelectedItem.ToString();
                 Byte[] buffer = new Byte[64];
                 buffer = Encoding.Default.GetBytes(friendRequest);
                 clientSocket.Send(buffer);
                 logs.AppendText(friend_box.Text + " removed from friends requests" + ".\n");
+                requestBox.Items.Remove(requestBox.SelectedItem.ToString());
+                requestBox.Update();
             }
         }
 
         private void requestFriendList_Click(object sender, EventArgs e)
         {
-
+            string flistreq = "flist" + nameBox.Text;
+            Byte[] buffer = new Byte[64];
+            buffer = Encoding.Default.GetBytes(flistreq);
+            clientSocket.Send(buffer);
         }
     }
 }

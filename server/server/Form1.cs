@@ -22,6 +22,7 @@ namespace server
         Socket serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
         List<Socket> clientSockets = new List<Socket>();
         List<string> Onlines = new List<string>();
+        Dictionary<string, List<string>> friendships = new Dictionary<string, List<string>>();
 
         string[] lines = System.IO.File.ReadAllLines(@"user_db.txt");
         bool terminating = false;
@@ -108,6 +109,7 @@ namespace server
 
                         // adds name 
                         Onlines.Add(incomingName);
+                        friendships.Add(incomingName, new List<string>());
 
                         foreach (Request req in pending)
                         {
@@ -227,6 +229,46 @@ namespace server
                             serverSocket.Close();
                         }
                     }
+
+                }
+                else if(incomingMessage.StartsWith("freply"))
+                {
+                    incomingMessage = incomingMessage.Replace("freply", "");
+                    if(incomingMessage.StartsWith("Reject"))
+                    {
+                        incomingMessage = incomingMessage.Replace("Reject", "");
+                        string rejector = incomingMessage.Substring(0, incomingMessage.IndexOf("-"));
+                        incomingMessage = incomingMessage.Replace(rejector + "-","");
+                        string rejected = incomingMessage;
+                        string message = rejector + " rejected your friend invite.\n";
+                        buffer = Encoding.Default.GetBytes(message);
+                        clientSockets[Onlines.IndexOf(rejected)].Send(buffer);
+                    }
+                    else if(incomingMessage.StartsWith("Accept"))
+                    {
+                        incomingMessage = incomingMessage.Replace("Accept", "");
+                        string accepter = incomingMessage.Substring(0, incomingMessage.IndexOf("-"));
+                        incomingMessage = incomingMessage.Replace(accepter + "-", "");
+                        string accepted = incomingMessage;
+                        string message = accepter + " accepted your friend invite.\n";
+                        buffer = Encoding.Default.GetBytes(message);
+                        clientSockets[Onlines.IndexOf(accepted)].Send(buffer);
+                        logs.AppendText(accepter + " accepted " + accepted + "'s friend request.\n");
+                        friendships[accepted].Add(accepter);
+                        friendships[accepter].Add(accepted);
+                    }
+                }
+                else if(incomingMessage.StartsWith("flist"))
+                {
+                    incomingMessage = incomingMessage.Replace("flist", "");
+                    logs.AppendText("Sending friends list to " + incomingMessage);
+                    string flist = "Friends List: \n";
+                    foreach (string s in friendships[incomingMessage])
+                    {
+                        flist += s + "\n";
+                    }
+                    buffer = Encoding.Default.GetBytes(flist);
+                    thisClient.Send(buffer);
 
                 }
                 else
