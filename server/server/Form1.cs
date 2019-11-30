@@ -180,7 +180,7 @@ namespace server
                         i++;
                     }
 
-                    if (lines.Contains(to))
+                    if (lines.Contains(to) && !friendships[from].Contains(to))
                     {
                         string message = "/valid/";
                         buffer = Encoding.Default.GetBytes(message);
@@ -301,7 +301,7 @@ namespace server
                             logs.AppendText("This message is broadcasted: " + incomingMessage + "\n");
                         }
                         else
-                            logs.AppendText("Message could not be broadcasted only one client connected");
+                            logs.AppendText("Message could not be broadcasted only one client connected\n");
 
                     }
                     catch

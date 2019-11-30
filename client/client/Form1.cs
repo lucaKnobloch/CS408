@@ -128,11 +128,11 @@ namespace client
                         logs.AppendText(incomingMessage + "\n");
                     }
                 }
-                catch(Exception e)
+                catch
                 {
                     if (!terminating)
                     {
-                        logs.AppendText("The server has disconnected\n" + e.ToString());
+                        logs.AppendText("The server has disconnected\n");
                         button_connect.Enabled = true;
                         textBox_message.Enabled = false;
                         button_send.Enabled = false;
@@ -212,10 +212,9 @@ namespace client
         {
            
             string friendRequest;
-            // TODO: Replace xyz with identifier for friend request
             if (friend_box.Text == "" || friend_box.Text.Length > 64)
             {
-                logs.AppendText("Invalid friend name");
+                logs.AppendText("Invalid friend name\n");
             }
             else
             {
@@ -230,7 +229,7 @@ namespace client
                 }
                 else
                 {
-                    logs.AppendText("Invalid friend name");
+                    logs.AppendText("Invalid friend name\n");
                 }
 
             }
@@ -242,7 +241,7 @@ namespace client
             // TODO: Replace xyz with identifier for friend remove
             if (friend_box.Text == "" || friend_box.Text.Length > 64)
             {
-                logs.AppendText("Invalid friend name");
+                logs.AppendText("Invalid friend name\n");
             }
             else
             {
@@ -257,7 +256,7 @@ namespace client
                 }
                 else
                 {
-                    logs.AppendText("Invalid friend name");
+                    logs.AppendText("Invalid friend name\n");
                 }
             }
         }
