@@ -150,7 +150,14 @@ namespace client
         {
             connected = false;
             terminating = true;
-            Environment.Exit(0);
+            try
+            {
+                Environment.Exit(0);
+            }
+            catch
+            {
+
+            }
         }
 
         private void button_send_Click(object sender, EventArgs e)
