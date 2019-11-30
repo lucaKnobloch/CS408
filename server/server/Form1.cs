@@ -165,7 +165,7 @@ namespace server
                 {
                     string from = "", to = "";
                     int i = 0;
-
+                    incomingMessage = incomingMessage.Replace("sentrequestby(", "");
                     while (incomingMessage.ElementAt(i) != ')')
                     {
                         from += incomingMessage.ElementAt(i);
@@ -270,7 +270,6 @@ namespace server
                         }
                         int index = clientSockets.FindIndex(socket => socket == thisClient);
                         string thisName = Onlines[index];
-                        // thisClient will be removed from the list to not get the own message
                         Onlines.Remove(thisName);
                         clientSockets.Remove(thisClient);
                         thisClient.Close();

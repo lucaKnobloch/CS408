@@ -163,7 +163,6 @@
             // 
             // requestBox
             // 
-            this.requestBox.DataSource = this.form1BindingSource;
             this.requestBox.FormattingEnabled = true;
             this.requestBox.ItemHeight = 16;
             this.requestBox.Location = new System.Drawing.Point(470, 61);

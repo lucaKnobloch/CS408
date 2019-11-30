@@ -99,6 +99,7 @@ namespace client
 
         private void Receive()
         {
+            this.Controls.Add(requestBox);
             while (connected)
             {
                 try
@@ -107,16 +108,13 @@ namespace client
                     clientSocket.Receive(buffer);
                     string incomingMessage = Encoding.Default.GetString(buffer);
                     incomingMessage = incomingMessage.Substring(0, incomingMessage.IndexOf("\0"));
-                    // TODO: Replace if condition with a check for identifier for incoming friend request.
                     if (incomingMessage.StartsWith("friendrequestfrom"))
                     {
-                        // TODO: Replace xyz with identifier for incoming friend request
                         incomingMessage = incomingMessage.Replace("friendrequestfrom", "");
                         requestBox.BeginUpdate();
                         requestBox.Items.Add(incomingMessage);
                         requestBox.EndUpdate();
                     }
-                    // TODO: Replace xxyz with identifier for confirming/denying valid friend request
                     else if (incomingMessage.StartsWith("/"))
                     {
                         incomingMessage = incomingMessage.Replace("/", "");
@@ -130,11 +128,11 @@ namespace client
                         logs.AppendText(incomingMessage + "\n");
                     }
                 }
-                catch
+                catch(Exception e)
                 {
                     if (!terminating)
                     {
-                        logs.AppendText("The server has disconnected\n");
+                        logs.AppendText("The server has disconnected\n" + e.ToString());
                         button_connect.Enabled = true;
                         textBox_message.Enabled = false;
                         button_send.Enabled = false;
@@ -277,7 +275,9 @@ namespace client
                 Byte[] buffer = new Byte[64];
                 buffer = Encoding.Default.GetBytes(friendRequest);
                 clientSocket.Send(buffer);
-                logs.AppendText(friend_box.Text + " added to friends list" + ".\n");
+                logs.AppendText(requestBox.SelectedItem.ToString() + " added to friends list" + ".\n");
+                requestBox.Items.Remove(requestBox.SelectedItem.ToString());
+                requestBox.Update();
             }
         }
 
