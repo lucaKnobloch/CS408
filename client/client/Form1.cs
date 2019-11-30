@@ -210,10 +210,11 @@ namespace client
 
         private void add_button_Click(object sender, EventArgs e)
         {
-           
+
             string friendRequest;
-            if (friend_box.Text == "" || friend_box.Text.Length > 64)
+            if (friend_box.Text == "" || friend_box.Text.Length > 64 || friend_box.Text == nameBox.Text)
             {
+
                 logs.AppendText("Invalid friend name\n");
             }
             else
@@ -263,11 +264,8 @@ namespace client
 
         private void acceptButton_Click(object sender, EventArgs e)
         {
-            if (requestBox.SelectedItem.ToString() == "")
-            {
-                logs.AppendText("No friend request selected.");
-            }
-            else
+           
+            try
             {
                 string friendRequest = "freplyAccept" + nameBox.Text + "-" + requestBox.SelectedItem.ToString();
                 Byte[] buffer = new Byte[64];
@@ -276,16 +274,17 @@ namespace client
                 logs.AppendText(requestBox.SelectedItem.ToString() + " added to friends list" + ".\n");
                 requestBox.Items.Remove(requestBox.SelectedItem.ToString());
                 requestBox.Update();
+            } 
+            catch 
+            {
+                logs.AppendText("An error occured.\n");
             }
         }
 
         private void rejectButton_Click(object sender, EventArgs e)
         {
-            if (requestBox.SelectedItem.ToString() == "")
-            {
-                logs.AppendText("No friend request selected.");
-            }
-            else
+           
+            try
             {
                 string friendRequest = "freplyReject" + nameBox.Text + "-" + requestBox.SelectedItem.ToString();
                 Byte[] buffer = new Byte[64];
@@ -294,15 +293,24 @@ namespace client
                 logs.AppendText(friend_box.Text + " removed from friends requests" + ".\n");
                 requestBox.Items.Remove(requestBox.SelectedItem.ToString());
                 requestBox.Update();
+            } 
+            catch
+            {
+                logs.AppendText("An error occured.\n");
             }
         }
 
         private void requestFriendList_Click(object sender, EventArgs e)
         {
-            string flistreq = "flist" + nameBox.Text;
-            Byte[] buffer = new Byte[64];
-            buffer = Encoding.Default.GetBytes(flistreq);
-            clientSocket.Send(buffer);
+            if (connected)
+            {
+                string flistreq = "flist" + nameBox.Text;
+                Byte[] buffer = new Byte[64];
+                buffer = Encoding.Default.GetBytes(flistreq);
+                clientSocket.Send(buffer);
+            }
+            else
+                logs.AppendText("Not connected.\n");
         }
     }
 }

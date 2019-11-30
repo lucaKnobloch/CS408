@@ -113,7 +113,7 @@ namespace server
 
                         foreach (Request req in pending)
                         {
-                            if (incomingName == req.To )
+                            if (incomingName == req.To)
                             {
                                 try
                                 {
@@ -158,45 +158,54 @@ namespace server
 
             while (connected && !terminating)
             {
-                Byte[] buffer = new Byte[64];
-                thisClient.Receive(buffer);
-                string incomingMessage = Encoding.Default.GetString(buffer);
-                incomingMessage = incomingMessage.Substring(0, incomingMessage.IndexOf("\0"));
-
-                if (incomingMessage.StartsWith("sentrequestby("))//this is a friend request
+                try
                 {
-                    string from = "", to = "";
-                    int i = 0;
-                    incomingMessage = incomingMessage.Replace("sentrequestby(", "");
-                    while (incomingMessage.ElementAt(i) != ')')
-                    {
-                        from += incomingMessage.ElementAt(i);
-                        i++;
-                    }
-                    i++;//to get rid of ')'
-                    while (i < incomingMessage.Length)
-                    {
-                        to += incomingMessage.ElementAt(i);
-                        i++;
-                    }
+                    Byte[] buffer = new Byte[64];
+                    thisClient.Receive(buffer);
+                    string incomingMessage = Encoding.Default.GetString(buffer);
+                    incomingMessage = incomingMessage.Substring(0, incomingMessage.IndexOf("\0"));
 
-                    if (lines.Contains(to) && !friendships[from].Contains(to))
+                    if (incomingMessage.StartsWith("sentrequestby("))//this is a friend request
                     {
-                        string message = "/valid/";
-                        buffer = Encoding.Default.GetBytes(message);
-                        thisClient.Send(buffer);
-
-                        if (!Onlines.Contains(to))
-                            pending.Add(new Request { From = from, To = to });
-                        else
+                        string from = "", to = "";
+                        int i = 0;
+                        incomingMessage = incomingMessage.Replace("sentrequestby(", "");
+                        while (incomingMessage.ElementAt(i) != ')')
                         {
-                            try
+                            from += incomingMessage.ElementAt(i);
+                            i++;
+                        }
+                        i++;//to get rid of ')'
+                        while (i < incomingMessage.Length)
+                        {
+                            to += incomingMessage.ElementAt(i);
+                            i++;
+                        }
+
+                        if (lines.Contains(to) && !friendships[from].Contains(to))
+                        {
+                            string message = "/valid/";
+                            buffer = Encoding.Default.GetBytes(message);
+                            thisClient.Send(buffer);
+
+                            if (!Onlines.Contains(to))
+                                pending.Add(new Request { From = from, To = to });
+                            else
                             {
                                 string request = "friendrequestfrom" + from;
                                 buffer = Encoding.Default.GetBytes(request);
                                 int index = Onlines.FindIndex(a => a == to);
                                 Socket invitee = clientSockets[index];
                                 invitee.Send(buffer);
+                            }
+                        }
+                        else
+                        {
+                            try
+                            {
+                                string message = "/invalid/";//request is invalid, invitee doesn't exist.
+                                buffer = Encoding.Default.GetBytes(message);
+                                thisClient.Send(buffer);
                             }
                             catch
                             {
@@ -209,115 +218,107 @@ namespace server
                                 serverSocket.Close();
                             }
                         }
+
+                    }
+                    else if (incomingMessage.StartsWith("freply"))
+                    {
+                        incomingMessage = incomingMessage.Replace("freply", "");
+                        if (incomingMessage.StartsWith("Reject"))
+                        {
+                            incomingMessage = incomingMessage.Replace("Reject", "");
+                            string rejector = incomingMessage.Substring(0, incomingMessage.IndexOf("-"));
+                            incomingMessage = incomingMessage.Replace(rejector + "-", "");
+                            string rejected = incomingMessage;
+                            string message = rejector + " rejected your friend invite.\n";
+                            buffer = Encoding.Default.GetBytes(message);
+                            clientSockets[Onlines.IndexOf(rejected)].Send(buffer);
+                        }
+                        else if (incomingMessage.StartsWith("Accept"))
+                        {
+                            incomingMessage = incomingMessage.Replace("Accept", "");
+                            string accepter = incomingMessage.Substring(0, incomingMessage.IndexOf("-"));
+                            incomingMessage = incomingMessage.Replace(accepter + "-", "");
+                            string accepted = incomingMessage;
+                            string message = accepter + " accepted your friend invite.\n";
+                            buffer = Encoding.Default.GetBytes(message);
+                            clientSockets[Onlines.IndexOf(accepted)].Send(buffer);
+                            logs.AppendText(accepter + " accepted " + accepted + "'s friend request.\n");
+                            friendships[accepted].Add(accepter);
+                            friendships[accepter].Add(accepted);
+                        }
+                    }
+                    else if (incomingMessage.StartsWith("flist"))
+                    {
+                        incomingMessage = incomingMessage.Replace("flist", "");
+                        logs.AppendText("Sending friends list to " + incomingMessage);
+                        string flist = "Friends List: \n";
+                        foreach (string s in friendships[incomingMessage])
+                        {
+                            flist += s + "\n";
+                        }
+                        buffer = Encoding.Default.GetBytes(flist);
+                        thisClient.Send(buffer);
+
                     }
                     else
-                    {
                         try
                         {
-                            string message = "/invalid/";//request is invalid, invitee doesn't exist.
-                            buffer = Encoding.Default.GetBytes(message);
-                            thisClient.Send(buffer);
+                            // find name of thisClient user
+                            int index = clientSockets.FindIndex(socket => socket == thisClient);
+                            string thisName = Onlines[index];
+                            if (clientSockets.Count() > 0)
+                            {
+                                // clientsockets can be changed to the list of online clients
+                                foreach (Socket client in (clientSockets))
+                                {
+                                    try
+                                    {
+                                        if (client != thisClient)
+                                            client.Send(buffer);
+                                    }
+                                    catch
+                                    {
+                                        logs.AppendText("There is a problem! Check the connection...\n");
+                                        terminating = true;
+                                        textBox_message.Enabled = false;
+                                        button_send.Enabled = false;
+                                        textBox_port.Enabled = true;
+                                        button_listen.Enabled = true;
+                                        serverSocket.Close();
+                                    }
+                                }
+                                logs.AppendText("This message is broadcasted: " + incomingMessage + "\n");
+                            }
+                            else
+                                logs.AppendText("Message could not be broadcasted only one client connected\n");
+
                         }
                         catch
                         {
-                            logs.AppendText("There is a problem! Check the connection...\n");
-                            terminating = true;
-                            textBox_message.Enabled = false;
-                            button_send.Enabled = false;
-                            textBox_port.Enabled = true;
-                            button_listen.Enabled = true;
-                            serverSocket.Close();
-                        }
-                    }
-
-                }
-                else if(incomingMessage.StartsWith("freply"))
-                {
-                    incomingMessage = incomingMessage.Replace("freply", "");
-                    if(incomingMessage.StartsWith("Reject"))
-                    {
-                        incomingMessage = incomingMessage.Replace("Reject", "");
-                        string rejector = incomingMessage.Substring(0, incomingMessage.IndexOf("-"));
-                        incomingMessage = incomingMessage.Replace(rejector + "-","");
-                        string rejected = incomingMessage;
-                        string message = rejector + " rejected your friend invite.\n";
-                        buffer = Encoding.Default.GetBytes(message);
-                        clientSockets[Onlines.IndexOf(rejected)].Send(buffer);
-                    }
-                    else if(incomingMessage.StartsWith("Accept"))
-                    {
-                        incomingMessage = incomingMessage.Replace("Accept", "");
-                        string accepter = incomingMessage.Substring(0, incomingMessage.IndexOf("-"));
-                        incomingMessage = incomingMessage.Replace(accepter + "-", "");
-                        string accepted = incomingMessage;
-                        string message = accepter + " accepted your friend invite.\n";
-                        buffer = Encoding.Default.GetBytes(message);
-                        clientSockets[Onlines.IndexOf(accepted)].Send(buffer);
-                        logs.AppendText(accepter + " accepted " + accepted + "'s friend request.\n");
-                        friendships[accepted].Add(accepter);
-                        friendships[accepter].Add(accepted);
-                    }
-                }
-                else if(incomingMessage.StartsWith("flist"))
-                {
-                    incomingMessage = incomingMessage.Replace("flist", "");
-                    logs.AppendText("Sending friends list to " + incomingMessage);
-                    string flist = "Friends List: \n";
-                    foreach (string s in friendships[incomingMessage])
-                    {
-                        flist += s + "\n";
-                    }
-                    buffer = Encoding.Default.GetBytes(flist);
-                    thisClient.Send(buffer);
-
-                }
-                else
-                    try
-                    {
-                        // find name of thisClient user
-                        int index = clientSockets.FindIndex(socket => socket == thisClient);
-                        string thisName = Onlines[index];
-                        if (clientSockets.Count() > 0)
-                        {
-                            // clientsockets can be changed to the list of online clients
-                            foreach (Socket client in (clientSockets))
+                            if (!terminating)
                             {
-                                try
-                                {
-                                    if(client != thisClient)
-                                        client.Send(buffer);
-                                }
-                                catch
-                                {
-                                    logs.AppendText("There is a problem! Check the connection...\n");
-                                    terminating = true;
-                                    textBox_message.Enabled = false;
-                                    button_send.Enabled = false;
-                                    textBox_port.Enabled = true;
-                                    button_listen.Enabled = true;
-                                    serverSocket.Close();
-                                }
+                                logs.AppendText("A client has disconnected\n");
                             }
-                            logs.AppendText("This message is broadcasted: " + incomingMessage + "\n");
+                            int index = clientSockets.FindIndex(socket => socket == thisClient);
+                            string thisName = Onlines[index];
+                            Onlines.Remove(thisName);
+                            clientSockets.Remove(thisClient);
+                            thisClient.Close();
+                            connected = false;
                         }
-                        else
-                            logs.AppendText("Message could not be broadcasted only one client connected\n");
-
-                    }
-                    catch
-                    {
-                        if (!terminating)
-                        {
-                            logs.AppendText("A client has disconnected\n");
-                        }
-                        int index = clientSockets.FindIndex(socket => socket == thisClient);
-                        string thisName = Onlines[index];
-                        Onlines.Remove(thisName);
-                        clientSockets.Remove(thisClient);
-                        thisClient.Close();
-                        connected = false;
-                    }
+                }
+                catch
+                {
+                    logs.AppendText("A client disconnected.\n");
+                    terminating = true;
+                    textBox_message.Enabled = false;
+                    button_send.Enabled = false;
+                    textBox_port.Enabled = true;
+                    button_listen.Enabled = true;
+                    serverSocket.Close();
+                }
             }
+
         }
 
         private void Form1_FormClosing(object sender, System.ComponentModel.CancelEventArgs e)
