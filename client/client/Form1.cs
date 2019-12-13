@@ -44,6 +44,7 @@ namespace client
                         {
                             clientSocket.Connect(IP, portNum);
                             terminating = false;
+
                             // Send name
                             Byte[] buffer = new Byte[64];
                             buffer = Encoding.Default.GetBytes(name);
@@ -67,6 +68,7 @@ namespace client
                                 button_connect.Enabled = false;
                                 textBox_message.Enabled = true;
                                 button_send.Enabled = true;
+                                button1.Enabled = true;
                                 disconnectButton.Enabled = true;
                                 connected = true;
                                 logs.AppendText("Connected to the server!\n");
@@ -114,6 +116,7 @@ namespace client
                         requestBox.BeginUpdate();
                         requestBox.Items.Add(incomingMessage);
                         requestBox.EndUpdate();
+                        button1.Enabled = true;
                     }
                     else if (incomingMessage.StartsWith("/"))
                     {
@@ -137,6 +140,7 @@ namespace client
                         textBox_message.Enabled = false;
                         button_send.Enabled = false;
                         disconnectButton.Enabled = false;
+                        button1.Enabled = false;
                     }
 
                     clientSocket.Close();
@@ -205,6 +209,7 @@ namespace client
             textBox_message.Enabled = false;
             button_send.Enabled = false;
             disconnectButton.Enabled = false;
+            button1.Enabled = false;
             clientSocket.Close();
             connected = false;
             terminating = true;
@@ -243,7 +248,7 @@ namespace client
             }
         }
 
-        private void button2_Click(object sender, EventArgs e)//STEP 3 ? -Ozgur
+        private void button2_Click(object sender, EventArgs e)
         {
             string friendRemove;
             // TODO: Replace xyz with identifier for friend remove
@@ -281,6 +286,7 @@ namespace client
                 logs.AppendText(requestBox.SelectedItem.ToString() + " added to friends list" + ".\n");
                 requestBox.Items.Remove(requestBox.SelectedItem.ToString());
                 requestBox.Update();
+                button1.Enabled = true;
             } 
             catch 
             {
@@ -318,6 +324,34 @@ namespace client
             }
             else
                 logs.AppendText("Not connected.\n");
+        } 
+
+        private void button_send_friends_Click(object sender, EventArgs e)
+        {
+            // sends message to server which leads it to the correponding friends
+            string message = textBox_message_friends.Text;
+            if (message != "")
+            {
+                if (message.Length <= 64)
+                {
+                    message = nameBox.Text + message;
+                    string messageSuffix = "sentfriends(" + nameBox.Text + "/ " + message;
+                    Byte[] buffer = new Byte[64];
+                    buffer = Encoding.Default.GetBytes(messageSuffix);
+                    clientSocket.Send(buffer);
+                    logs.AppendText("Message is sent" + "\n");
+                }
+                else
+                {
+                    logs.AppendText("The message is too long!" + "\n");
+                }
+
+            }
+
+            else
+            {
+                logs.AppendText("Add a message to sent" + "\n");
+            }
         }
     }
 }

@@ -14,6 +14,7 @@ public class Request //Class for keeping requests
 {
     public string From { get; set; }
     public string To { get; set; }
+    public string Message { get; set; }
 }
 namespace server
 {
@@ -106,21 +107,34 @@ namespace server
                         string wakeClient = "confirmed";
                         Byte[] buffer = Encoding.Default.GetBytes(wakeClient);
                         newClient.Send(buffer);
-
                         // adds name 
                         Onlines.Add(incomingName);
-                        friendships.Add(incomingName, new List<string>());
 
+                        logs.AppendText("Test0");
                         foreach (Request req in pending)
                         {
+                            logs.AppendText("Test3");
+
                             if (incomingName == req.To)
                             {
                                 try
                                 {
-                                    string request = "friendrequestfrom" + req.From;
-                                    buffer = Encoding.Default.GetBytes(request);
-                                    newClient.Send(buffer);
-                                    pending.Remove(req);
+                                    if (req.Message != "")
+                                        {
+
+                                        string request = req.From + ": "+ req.Message;
+                                        buffer = Encoding.Default.GetBytes(request);
+                                        newClient.Send(buffer);
+                                        pending.Remove(req);
+                                    }
+                                    else
+                                        {
+                                        logs.AppendText(req.From);
+                                        string request = "friendrequestfrom" + req.From;
+                                        buffer = Encoding.Default.GetBytes(request);
+                                        newClient.Send(buffer);
+                                        pending.Remove(req);
+                                    }
                                 }
                                 catch
                                 {
@@ -134,10 +148,18 @@ namespace server
                                 }
                             }
                         }
+
+                        if (!friendships.ContainsKey(incomingName))
+                        {
+                            friendships.Add(incomingName, new List<string>());
+                        }
+
+                      
                     }
                 }
-                catch
+                catch(Exception e)
                 {
+                    logs.AppendText(e.Message);
                     if (terminating)
                     {
                         listening = false;
@@ -189,7 +211,8 @@ namespace server
                             thisClient.Send(buffer);
 
                             if (!Onlines.Contains(to))
-                                pending.Add(new Request { From = from, To = to });
+                                pending.Add(new Request { From = from, To = to, Message = "" });
+
                             else
                             {
                                 string request = "friendrequestfrom" + from;
@@ -250,7 +273,7 @@ namespace server
                     else if (incomingMessage.StartsWith("flist"))
                     {
                         incomingMessage = incomingMessage.Replace("flist", "");
-                        logs.AppendText("Sending friends list to " + incomingMessage);
+                        logs.AppendText("Sending friends list to " + incomingMessage + "\n");
                         string flist = "Friends List: \n";
                         foreach (string s in friendships[incomingMessage])
                         {
@@ -258,6 +281,60 @@ namespace server
                         }
                         buffer = Encoding.Default.GetBytes(flist);
                         thisClient.Send(buffer);
+
+                    }
+
+                    // sent message to friends 
+                    else if (incomingMessage.StartsWith("sentfriends("))
+                    {
+                        // words[0] -> the name
+                        // words[1] -> the message
+                        incomingMessage = incomingMessage.Replace("sentfriends(", "");
+                        string[] words = incomingMessage.Split('/');
+                        words[1] = words[1].Replace(words[0], "");
+
+                        // check if friendshipslist is empty
+                        try
+                        {
+                            if(friendships[words[0]].Count == 0)
+                            {
+                                string errorMessage = "add a friend first to send messages\n";
+                                buffer = Encoding.Default.GetBytes(errorMessage);
+                                clientSockets[Onlines.IndexOf(words[0])].Send(buffer);
+                            }
+                            else
+                            {
+
+
+                                foreach (string s in friendships[words[0]])
+                                {
+                                    logs.AppendText(s);
+                                    if (!Onlines.Contains(s))
+                                    {
+                                        pending.Add(new Request { From = words[0], To = s, Message = words[1] });
+                                        string errorMessage = "Your friend " + s + " will receive the message after getting online again." + "\n";
+                                        buffer = Encoding.Default.GetBytes(errorMessage);
+                                        clientSockets[Onlines.IndexOf(words[0])].Send(buffer);
+                                    }
+                                    else if (friendships[words[0]].Contains(s) & Onlines.Contains(s))
+                                    {
+                                        logs.AppendText(words[0] + ": " + words[1] + " is sent" + "\n");
+                                        string message = words[0] + " sent Message:" + words[1];
+                                        buffer = Encoding.Default.GetBytes(message);
+                                        clientSockets[Onlines.IndexOf(s)].Send(buffer);
+
+                                    }
+
+                                }
+                            }
+                           
+                        }
+                        catch
+                        {
+                            string errorMessage = "add a friend first to send messages\n";
+                            buffer = Encoding.Default.GetBytes(errorMessage);
+                            clientSockets[Onlines.IndexOf(words[0])].Send(buffer);
+                        }
 
                     }
                     else

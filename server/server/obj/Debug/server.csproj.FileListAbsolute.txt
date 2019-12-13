@@ -43,3 +43,21 @@ C:\Users\Oden\Desktop\CS408-master\server\server\obj\Debug\server.exe
 C:\Users\Oden\Desktop\CS408-master\server\server\obj\Debug\server.pdb
 C:\Users\Porojax\Documents\GitHub\CS408\server\server\obj\Debug\Request.resources
 C:\Users\Oden\Desktop\CS408-master\server\server\obj\Debug\Request.resources
+C:\Users\WS3\Desktop\CS408-master\server\server\bin\Debug\server.exe.config
+C:\Users\WS3\Desktop\CS408-master\server\server\bin\Debug\server.exe
+C:\Users\WS3\Desktop\CS408-master\server\server\bin\Debug\server.pdb
+C:\Users\WS3\Desktop\CS408-master\server\server\obj\Debug\server.csprojAssemblyReference.cache
+C:\Users\WS3\Desktop\CS408-master\server\server\obj\Debug\Request.resources
+C:\Users\WS3\Desktop\CS408-master\server\server\obj\Debug\server.Properties.Resources.resources
+C:\Users\WS3\Desktop\CS408-master\server\server\obj\Debug\server.csproj.GenerateResource.cache
+C:\Users\WS3\Desktop\CS408-master\server\server\obj\Debug\server.exe
+C:\Users\WS3\Desktop\CS408-master\server\server\obj\Debug\server.pdb
+C:\Users\Luca Knobloch\Desktop\CS408-master\server\server\bin\Debug\server.exe.config
+C:\Users\Luca Knobloch\Desktop\CS408-master\server\server\bin\Debug\server.exe
+C:\Users\Luca Knobloch\Desktop\CS408-master\server\server\bin\Debug\server.pdb
+C:\Users\Luca Knobloch\Desktop\CS408-master\server\server\obj\Debug\server.csprojAssemblyReference.cache
+C:\Users\Luca Knobloch\Desktop\CS408-master\server\server\obj\Debug\Request.resources
+C:\Users\Luca Knobloch\Desktop\CS408-master\server\server\obj\Debug\server.Properties.Resources.resources
+C:\Users\Luca Knobloch\Desktop\CS408-master\server\server\obj\Debug\server.csproj.GenerateResource.cache
+C:\Users\Luca Knobloch\Desktop\CS408-master\server\server\obj\Debug\server.exe
+C:\Users\Luca Knobloch\Desktop\CS408-master\server\server\obj\Debug\server.pdb
