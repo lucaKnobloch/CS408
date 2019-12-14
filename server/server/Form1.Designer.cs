@@ -32,9 +32,6 @@
             this.label1 = new System.Windows.Forms.Label();
             this.button_listen = new System.Windows.Forms.Button();
             this.logs = new System.Windows.Forms.RichTextBox();
-            this.Label2 = new System.Windows.Forms.Label();
-            this.textBox_message = new System.Windows.Forms.TextBox();
-            this.button_send = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // textBox_port
@@ -71,42 +68,11 @@
             this.logs.TabIndex = 3;
             this.logs.Text = "";
             // 
-            // Label2
-            // 
-            this.Label2.AutoSize = true;
-            this.Label2.Location = new System.Drawing.Point(79, 600);
-            this.Label2.Name = "Label2";
-            this.Label2.Size = new System.Drawing.Size(106, 25);
-            this.Label2.TabIndex = 4;
-            this.Label2.Text = "Message:";
-            // 
-            // textBox_message
-            // 
-            this.textBox_message.Enabled = false;
-            this.textBox_message.Location = new System.Drawing.Point(192, 600);
-            this.textBox_message.Name = "textBox_message";
-            this.textBox_message.Size = new System.Drawing.Size(428, 31);
-            this.textBox_message.TabIndex = 5;
-            // 
-            // button_send
-            // 
-            this.button_send.Enabled = false;
-            this.button_send.Location = new System.Drawing.Point(639, 589);
-            this.button_send.Name = "button_send";
-            this.button_send.Size = new System.Drawing.Size(118, 53);
-            this.button_send.TabIndex = 6;
-            this.button_send.Text = "send";
-            this.button_send.UseVisualStyleBackColor = true;
-            this.button_send.Click += new System.EventHandler(this.button_send_Click);
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(906, 735);
-            this.Controls.Add(this.button_send);
-            this.Controls.Add(this.textBox_message);
-            this.Controls.Add(this.Label2);
             this.Controls.Add(this.logs);
             this.Controls.Add(this.button_listen);
             this.Controls.Add(this.label1);
@@ -124,9 +90,6 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button button_listen;
         private System.Windows.Forms.RichTextBox logs;
-        private System.Windows.Forms.Label Label2;
-        private System.Windows.Forms.TextBox textBox_message;
-        private System.Windows.Forms.Button button_send;
     }
 }
 

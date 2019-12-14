@@ -187,7 +187,7 @@ namespace client
 
             else
             {
-                logs.AppendText("Add a message to sent" + "\n");
+                logs.AppendText("Add a message to send" + "\n");
             }
 
         }
@@ -327,7 +327,7 @@ namespace client
 
         private void button_send_friends_Click(object sender, EventArgs e)
         {
-            // sends message to server which leads it to the correponding friends
+            // sends message to server which leads it to the corresponding friends
             string message = textBox_message_friends.Text;
             if (message != "")
             {
@@ -349,7 +349,22 @@ namespace client
 
             else
             {
-                logs.AppendText("Add a message to sent" + "\n");
+                logs.AppendText("Add a message to send" + "\n");
+            }
+        }
+
+        private void button2_Click_1(object sender, EventArgs e)
+        {
+            try
+            {
+                string Refreshrequests = "sendreqs" + nameBox.Text;
+                Byte[] buffer = new Byte[64];
+                buffer = Encoding.Default.GetBytes(Refreshrequests);
+                clientSocket.Send(buffer);
+            }
+            catch
+            {
+                logs.AppendText("An error occured.\n");
             }
         }
     }

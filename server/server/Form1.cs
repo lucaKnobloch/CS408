@@ -52,8 +52,6 @@ namespace server
 
                 listening = true;
                 button_listen.Enabled = false;
-                textBox_message.Enabled = true;
-                button_send.Enabled = true;
 
                 Thread acceptThread = new Thread(Accept);
                 acceptThread.Start();
@@ -120,31 +118,28 @@ namespace server
                                 try
                                 {
                                     if (req.Message != "")
+                                    {
+                                        string request = req.From + ": " + req.Message;
+                                        if (req.Message.StartsWith("fremove"))
                                         {
-                                        string request = req.From + ": "+ req.Message;
-                                        if(req.Message.StartsWith("fremove"))
-                                        {
-                                            request = req.Message.Replace("fremove","");
+                                            request = req.Message.Replace("fremove", "");
                                         }
                                         buffer = Encoding.Default.GetBytes(request);
                                         newClient.Send(buffer);
                                         pending.Remove(req);
                                     }
                                     else
-                                        {
+                                    {
                                         logs.AppendText(req.From);
                                         string request = "friendrequestfrom" + req.From;
                                         buffer = Encoding.Default.GetBytes(request);
                                         newClient.Send(buffer);
-                                        pending.Remove(req);
                                     }
                                 }
                                 catch
                                 {
                                     logs.AppendText("There is a problem! Check the connection...\n");
                                     terminating = true;
-                                    textBox_message.Enabled = false;
-                                    button_send.Enabled = false;
                                     textBox_port.Enabled = true;
                                     button_listen.Enabled = true;
                                     serverSocket.Close();
@@ -156,11 +151,9 @@ namespace server
                         {
                             friendships.Add(incomingName, new List<string>());
                         }
-
-                      
                     }
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     logs.AppendText(e.Message);
                     if (terminating)
@@ -206,24 +199,34 @@ namespace server
                             to += incomingMessage.ElementAt(i);
                             i++;
                         }
-
-                        if (lines.Contains(to) && !friendships[from].Contains(to))
+                        bool requested = false;
+                        foreach (Request req in pending)
+                        {
+                            if (from == req.From && to == req.To)
+                            {
+                                requested = true;
+                                break;//request already exists, no need to search anymore
+                            }
+                            else if (from == req.To && to == req.From)
+                            {
+                                requested = true;
+                                break;//request already exists, no need to search anymore
+                            }
+                        }
+                        if (lines.Contains(to) && !friendships[from].Contains(to) && !requested)
                         {
                             string message = "/valid/";
                             buffer = Encoding.Default.GetBytes(message);
                             thisClient.Send(buffer);
 
-                            if (!Onlines.Contains(to))
-                                pending.Add(new Request { From = from, To = to, Message = "" });
+                            pending.Add(new Request { From = from, To = to, Message = "" });
+                            string request = "friendrequestfrom" + from;
+                            buffer = Encoding.Default.GetBytes(request);
+                            int index = Onlines.FindIndex(a => a == to);
+                            Socket invitee = clientSockets[index];
+                            invitee.Send(buffer);
 
-                            else
-                            {
-                                string request = "friendrequestfrom" + from;
-                                buffer = Encoding.Default.GetBytes(request);
-                                int index = Onlines.FindIndex(a => a == to);
-                                Socket invitee = clientSockets[index];
-                                invitee.Send(buffer);
-                            }
+                            requested = false;
                         }
                         else
                         {
@@ -237,8 +240,6 @@ namespace server
                             {
                                 logs.AppendText("There is a problem! Check the connection...\n");
                                 terminating = true;
-                                textBox_message.Enabled = false;
-                                button_send.Enabled = false;
                                 textBox_port.Enabled = true;
                                 button_listen.Enabled = true;
                                 serverSocket.Close();
@@ -261,6 +262,7 @@ namespace server
                         }
                         else if (incomingMessage.StartsWith("Accept"))
                         {
+
                             incomingMessage = incomingMessage.Replace("Accept", "");
                             string accepter = incomingMessage.Substring(0, incomingMessage.IndexOf("-"));
                             incomingMessage = incomingMessage.Replace(accepter + "-", "");
@@ -271,6 +273,10 @@ namespace server
                             logs.AppendText(accepter + " accepted " + accepted + "'s friend request.\n");
                             friendships[accepted].Add(accepter);
                             friendships[accepter].Add(accepted);
+                            Request req = new Request { From = accepted, To = accepter };
+                            pending.Remove(req);//removes from pending if only accepted.
+
+
                         }
                     }
                     else if (incomingMessage.StartsWith("flist"))
@@ -286,6 +292,24 @@ namespace server
                         thisClient.Send(buffer);
 
                     }
+                    else if (incomingMessage == ("sendreqs"))
+                    {
+                        string thisName = "";
+                        incomingMessage = incomingMessage.Replace("sendreqs", "");
+                        thisName = incomingMessage;
+
+                        int index = Onlines.FindIndex(name => name == thisName);
+                        thisClient = clientSockets[index];
+
+                        foreach (Request req in pending)
+                        {
+                            if (req.To == thisName)
+                            {
+                                buffer = Encoding.Default.GetBytes("friendrequestfrom" + req.From + "\n");
+                                thisClient.Send(buffer);
+                            }
+                        }
+                    }
 
                     // sent message to friends 
                     else if (incomingMessage.StartsWith("sentfriends("))
@@ -299,7 +323,7 @@ namespace server
                         // check if friendshipslist is empty
                         try
                         {
-                            if(friendships[words[0]].Count == 0)
+                            if (friendships[words[0]].Count == 0)
                             {
                                 string errorMessage = "add a friend first to send messages\n";
                                 buffer = Encoding.Default.GetBytes(errorMessage);
@@ -330,7 +354,7 @@ namespace server
 
                                 }
                             }
-                           
+
                         }
                         catch
                         {
@@ -345,7 +369,7 @@ namespace server
                         incomingMessage = incomingMessage.Replace("fremove", "");
                         string remover = incomingMessage.Substring(0, incomingMessage.IndexOf("+"));
                         string removed = incomingMessage.Replace(remover + "+", "");
-                        if(lines.Contains(removed) && friendships[remover].Contains(removed))
+                        if (lines.Contains(removed) && friendships[remover].Contains(removed))
                         {
                             string message = "/valid/";
                             buffer = Encoding.Default.GetBytes(message);
@@ -353,7 +377,7 @@ namespace server
                             friendships[remover].Remove(removed);
                             friendships[removed].Remove(remover);
                             logs.AppendText(remover + " removed " + removed + " from their friendslist.\n");
-                            if(Onlines.Contains(removed))
+                            if (Onlines.Contains(removed))
                             {
                                 message = remover + " removed you from their friends list.\n";
                                 buffer = Encoding.Default.GetBytes(message);
@@ -362,7 +386,8 @@ namespace server
                             else
                             {
                                 message = "fremove" + remover + " removed you from their friends list.\n";
-                                pending.Add(new Request { From = remover, To = removed, Message = message });
+                                //pending.Add(new Request { From = remover, To = removed, Message = message });
+                                //seems like a problem
                             }
                         }
                         else
@@ -377,8 +402,6 @@ namespace server
                             {
                                 logs.AppendText("There is a problem! Check the connection...\n");
                                 terminating = true;
-                                textBox_message.Enabled = false;
-                                button_send.Enabled = false;
                                 textBox_port.Enabled = true;
                                 button_listen.Enabled = true;
                                 serverSocket.Close();
@@ -423,7 +446,6 @@ namespace server
             }
 
         }
-
         private void Form1_FormClosing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             listening = false;
@@ -438,32 +460,5 @@ namespace server
             }
         }
 
-        private void button_send_Click(object sender, EventArgs e)
-        {
-            string message = "Server:" + textBox_message.Text;
-            if (message != "" && message.Length <= 64)
-            {
-                Byte[] buffer = Encoding.Default.GetBytes(message);
-
-                foreach (Socket client in clientSockets)
-                {
-                    try
-                    {
-                        client.Send(buffer);
-                    }
-                    catch
-                    {
-                        logs.AppendText("There is a problem! Check the connection...\n");
-                        terminating = true;
-                        textBox_message.Enabled = false;
-                        button_send.Enabled = false;
-                        textBox_port.Enabled = true;
-                        button_listen.Enabled = true;
-                        serverSocket.Close();
-                    }
-
-                }
-            }
-        }
     }
 }
