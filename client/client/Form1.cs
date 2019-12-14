@@ -251,14 +251,13 @@ namespace client
         private void button2_Click(object sender, EventArgs e)
         {
             string friendRemove;
-            // TODO: Replace xyz with identifier for friend remove
             if (friend_box.Text == "" || friend_box.Text.Length > 64)
             {
                 logs.AppendText("Invalid friend name\n");
             }
             else
             {
-                friendRemove = "xyz" + nameBox.Text + "+" + friend_box.Text;
+                friendRemove = "fremove" + nameBox.Text + "+" + friend_box.Text;
                 Byte[] buffer = new Byte[64];
                 buffer = Encoding.Default.GetBytes(friendRemove);
                 clientSocket.Send(buffer);

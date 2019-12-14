@@ -121,8 +121,11 @@ namespace server
                                 {
                                     if (req.Message != "")
                                         {
-
                                         string request = req.From + ": "+ req.Message;
+                                        if(req.Message.StartsWith("fremove"))
+                                        {
+                                            request = req.Message.Replace("fremove","");
+                                        }
                                         buffer = Encoding.Default.GetBytes(request);
                                         newClient.Send(buffer);
                                         pending.Remove(req);
@@ -337,6 +340,52 @@ namespace server
                         }
 
                     }
+                    else if (incomingMessage.StartsWith("fremove"))
+                    {
+                        incomingMessage = incomingMessage.Replace("fremove", "");
+                        string remover = incomingMessage.Substring(0, incomingMessage.IndexOf("+"));
+                        string removed = incomingMessage.Replace(remover + "+", "");
+                        if(lines.Contains(removed) && friendships[remover].Contains(removed))
+                        {
+                            string message = "/valid/";
+                            buffer = Encoding.Default.GetBytes(message);
+                            thisClient.Send(buffer);
+                            friendships[remover].Remove(removed);
+                            friendships[removed].Remove(remover);
+                            logs.AppendText(remover + " removed " + removed + " from their friendslist.\n");
+                            if(Onlines.Contains(removed))
+                            {
+                                message = remover + " removed you from their friends list.\n";
+                                buffer = Encoding.Default.GetBytes(message);
+                                clientSockets[Onlines.IndexOf(removed)].Send(buffer);
+                            }
+                            else
+                            {
+                                message = "fremove" + remover + " removed you from their friends list.\n";
+                                pending.Add(new Request { From = remover, To = removed, Message = message });
+                            }
+                        }
+                        else
+                        {
+                            try
+                            {
+                                string message = "/invalid/";//request is invalid, invitee doesn't exist.
+                                buffer = Encoding.Default.GetBytes(message);
+                                thisClient.Send(buffer);
+                            }
+                            catch
+                            {
+                                logs.AppendText("There is a problem! Check the connection...\n");
+                                terminating = true;
+                                textBox_message.Enabled = false;
+                                button_send.Enabled = false;
+                                textBox_port.Enabled = true;
+                                button_listen.Enabled = true;
+                                serverSocket.Close();
+                            }
+                        }
+                    }
+
                     else
 
                     {
