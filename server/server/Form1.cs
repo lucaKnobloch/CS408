@@ -108,10 +108,8 @@ namespace server
                         // adds name 
                         Onlines.Add(incomingName);
 
-                        logs.AppendText("Test0");
                         foreach (Request req in pending)
                         {
-                            logs.AppendText("Test3");
 
                             if (incomingName == req.To)
                             {
@@ -202,6 +200,7 @@ namespace server
                         bool requested = false;
                         foreach (Request req in pending)
                         {
+
                             if (from == req.From && to == req.To)
                             {
                                 requested = true;
@@ -213,20 +212,23 @@ namespace server
                                 break;//request already exists, no need to search anymore
                             }
                         }
+
+
                         if (lines.Contains(to) && !friendships[from].Contains(to) && !requested)
                         {
                             string message = "/valid/";
                             buffer = Encoding.Default.GetBytes(message);
                             thisClient.Send(buffer);
-
-                            pending.Add(new Request { From = from, To = to, Message = "" });
                             string request = "friendrequestfrom" + from;
                             buffer = Encoding.Default.GetBytes(request);
-                            int index = Onlines.FindIndex(a => a == to);
-                            Socket invitee = clientSockets[index];
-                            invitee.Send(buffer);
-
+                            // int index = Onlines.FindIndex(a => a == to);
+                            // Socket invitee = clientSockets[index];
+                            clientSockets[Onlines.IndexOf(to)].Send(buffer);
                             requested = false;
+                        }
+                        if (lines.Contains(to) && !friendships[from].Contains(to) && !Onlines.Contains(to))
+                            {
+                            pending.Add(new Request { From = from, To = to, Message = "" });
                         }
                         else
                         {
@@ -273,7 +275,7 @@ namespace server
                             logs.AppendText(accepter + " accepted " + accepted + "'s friend request.\n");
                             friendships[accepted].Add(accepter);
                             friendships[accepter].Add(accepted);
-                            Request req = new Request { From = accepted, To = accepter };
+                            Request req = new Request { From = accepted, To = accepter, Message = "" };
                             pending.Remove(req);//removes from pending if only accepted.
 
 
@@ -366,46 +368,63 @@ namespace server
                     }
                     else if (incomingMessage.StartsWith("fremove"))
                     {
-                        incomingMessage = incomingMessage.Replace("fremove", "");
-                        string remover = incomingMessage.Substring(0, incomingMessage.IndexOf("+"));
-                        string removed = incomingMessage.Replace(remover + "+", "");
-                        if (lines.Contains(removed) && friendships[remover].Contains(removed))
+                        try
                         {
-                            string message = "/valid/";
-                            buffer = Encoding.Default.GetBytes(message);
-                            thisClient.Send(buffer);
-                            friendships[remover].Remove(removed);
-                            friendships[removed].Remove(remover);
-                            logs.AppendText(remover + " removed " + removed + " from their friendslist.\n");
-                            if (Onlines.Contains(removed))
+                            incomingMessage = incomingMessage.Replace("fremove", "");
+                            string remover = incomingMessage.Substring(0, incomingMessage.IndexOf("+"));
+                            string removed = incomingMessage.Replace(remover + "+", "");
+                            if (lines.Contains(removed) && friendships[remover].Contains(removed))
                             {
-                                message = remover + " removed you from their friends list.\n";
+                                string message = "/valid/";
                                 buffer = Encoding.Default.GetBytes(message);
-                                clientSockets[Onlines.IndexOf(removed)].Send(buffer);
+                                thisClient.Send(buffer);
+                                friendships[remover].Remove(removed);
+                                friendships[removed].Remove(remover);
+                                logs.AppendText(remover + " removed " + removed + " from their friendslist.\n");
+                                if (Onlines.Contains(removed))
+                                {
+                                    message = remover + " removed you from their friends list.\n";
+                                    buffer = Encoding.Default.GetBytes(message);
+                                    clientSockets[Onlines.IndexOf(removed)].Send(buffer);
+
+                                }
+                                else
+                                {
+                                    message = "fremove" + remover + " removed you from their friends list.\n";
+                                    pending.Add(new Request { From = remover, To = removed, Message = message });
+                                    //seems like a problem
+                                }
                             }
                             else
                             {
-                                message = "fremove" + remover + " removed you from their friends list.\n";
-                                //pending.Add(new Request { From = remover, To = removed, Message = message });
-                                //seems like a problem
+                                try
+                                {
+                                    string message = "/invalid/";//request is invalid, invitee doesn't exist.
+                                    buffer = Encoding.Default.GetBytes(message);
+                                    thisClient.Send(buffer);
+                                }
+                                catch
+                                {
+                                    logs.AppendText("There is a problem! Check the connection...\n");
+                                    terminating = true;
+                                    textBox_port.Enabled = true;
+                                    button_listen.Enabled = true;
+                                    serverSocket.Close();
+                                }
                             }
                         }
-                        else
+                        catch
                         {
-                            try
+                            if (!terminating)
                             {
-                                string message = "/invalid/";//request is invalid, invitee doesn't exist.
-                                buffer = Encoding.Default.GetBytes(message);
-                                thisClient.Send(buffer);
+                                logs.AppendText("A client has disconnected\n");
                             }
-                            catch
-                            {
-                                logs.AppendText("There is a problem! Check the connection...\n");
-                                terminating = true;
-                                textBox_port.Enabled = true;
-                                button_listen.Enabled = true;
-                                serverSocket.Close();
-                            }
+                            int index = clientSockets.FindIndex(socket => socket == thisClient);
+                            string thisName = Onlines[index];
+                            Onlines.Remove(thisName);
+                            clientSockets.Remove(thisClient);
+                            thisClient.Close();
+                            connected = false;
                         }
                     }
 
@@ -436,13 +455,24 @@ namespace server
                     {
                         logs.AppendText("A client has disconnected\n");
                     }
-                    int index = clientSockets.FindIndex(socket => socket == thisClient);
-                    string thisName = Onlines[index];
-                    Onlines.Remove(thisName);
-                    clientSockets.Remove(thisClient);
-                    thisClient.Close();
-                    connected = false;
-                }
+                    try
+                    {
+
+                        int index = clientSockets.FindIndex(socket => socket == thisClient);
+                        string thisName = Onlines[index];
+                        Onlines.Remove(thisName);
+                        clientSockets.Remove(thisClient);
+                        thisClient.Close();
+                        connected = false;
+                    }
+                    catch
+                    {
+                        clientSockets.Remove(thisClient);
+                        thisClient.Close();
+                        connected = false;
+                   
+            }
+        }
             }
 
         }
