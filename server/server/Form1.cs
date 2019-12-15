@@ -219,12 +219,19 @@ namespace server
                             string message = "/valid/";
                             buffer = Encoding.Default.GetBytes(message);
                             thisClient.Send(buffer);
-                            string request = "friendrequestfrom" + from;
-                            buffer = Encoding.Default.GetBytes(request);
-                            // int index = Onlines.FindIndex(a => a == to);
-                            // Socket invitee = clientSockets[index];
-                            clientSockets[Onlines.IndexOf(to)].Send(buffer);
-                            requested = false;
+                            if(Onlines.Contains(to))
+                            {
+                                string request = "friendrequestfrom" + from;
+                                buffer = Encoding.Default.GetBytes(request);
+                                // int index = Onlines.FindIndex(a => a == to);
+                                // Socket invitee = clientSockets[index];
+                                clientSockets[Onlines.IndexOf(to)].Send(buffer);
+                                requested = false;
+                            }
+                            else
+                            {
+                                pending.Add(new Request { From = from, To = to, Message = "" });
+                            }
                         }
                         if (lines.Contains(to) && !friendships[from].Contains(to) && !Onlines.Contains(to))
                             {
