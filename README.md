@@ -1,4 +1,6 @@
 # Socket Programming
+It is an Client - Server interaction and is written in C#. <br>
+Developed by a project group to enable the user to have social interactions with other clients. <br>
+The user is able to add/remove online/offline friends. The user is able to send messages to all online clients and to all online/offline friends. <br>
+The offline cases will be handled by a pending list. 
 
-output of a group project regarding a social media interface. 
-The user is able to add/remove friends and send messages seperate to all of the clients as only to friends. As well the offline cases will take care of in pending lists. 
